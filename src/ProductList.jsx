@@ -1,9 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem } from './CartSlice';
 function ProductList({ onHomeClick }) {
-    const [showCart, setShowCart] = useState(false);
-    const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+
+        const [showCart, setShowCart] = useState(false);
+        const [showPlants, setShowPlants] = useState(false);
+
+        const dispatch = useDispatch();
+
+        const CartItems = useSelector(
+        state => state.cart.items
+        );
+
+        // Calculate total quantity of all items in cart
+        const calculateTotalQuantity = () => {
+        return CartItems.reduce(
+            (total, item) => total + item.quantity,
+            0
+        );
+        };
+
+        const [addedToCart, setAddedToCart] = useState({});
+
+        // Add product to cart
+        const handleAddToCart = (product) => {
+        dispatch(addItem(product));
+
+        setAddedToCart(prevState => ({
+            ...prevState,
+            [product.name]: true,
+        }));
+        };
 
     const plantsArray = [
         {
@@ -274,6 +303,51 @@ function ProductList({ onHomeClick }) {
             </div>
             {!showCart ? (
                 <div className="product-grid">
+
+
+                        {plantsArray.map((category, index) => (
+                            <div key={index}>
+                                <h1>{category.category}</h1>
+
+                                <div className="product-list">
+                                    {category.plants.map((plant, plantIndex) => (
+                                        <div className="product-card" key={plantIndex}>
+                                            <img
+                                                className="product-image"
+                                                src={plant.image}
+                                                alt={plant.name}
+                                            />
+
+                                            <div className="product-title">
+                                                {plant.name}
+                                            </div>
+
+                                            <div className="product-description">
+                                                {plant.description}
+                                            </div>
+
+                                            <div className="product-cost">
+                                                {plant.cost}
+                                            </div>
+
+                                            <button
+                                                className="product-button"
+                                                onClick={() => handleAddToCart(plant)}
+                                            >
+                                                {addedToCart[plant.name] ? 'Added to Cart' : 'Add to Cart'}
+                                            </button> 
+                                            {CartItems.find(item => item.name === plant.name) && (
+                                            <p>
+                                                Cart Items: {
+                                                CartItems.find(item => item.name === plant.name).quantity
+                                                }
+                                            </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
 
 
                 </div>
